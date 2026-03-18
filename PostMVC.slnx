@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PostDomain/PostDomain.csproj" />
+  <Project Path="PostInfrastructure/PostInfrastructure.csproj" Id="a93b966b-e799-4883-afd6-4ce65a3e7041" />
+</Solution>
