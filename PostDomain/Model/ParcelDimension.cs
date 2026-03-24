@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PostDomain.Model;
 
-public partial class ParcelDimension : Entity
+public partial class ParcelDimension
 {
     public int ParcelId { get; set; }
 

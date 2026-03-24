@@ -15,6 +15,8 @@ public partial class ParcelCourier : Entity
 
     public DateTime? DeliveredAt { get; set; }
 
+    public CourierStatus CourierStatus { get; set; }
+
     public virtual Courier Courier { get; set; } = null!;
 
     public virtual Parcel Parcel { get; set; } = null!;

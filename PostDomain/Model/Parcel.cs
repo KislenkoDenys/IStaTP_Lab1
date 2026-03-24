@@ -21,6 +21,8 @@ public partial class Parcel : Entity
 
     public double Weight { get; set; }
 
+    public ParcelStatus Status { get; set; }
+
     public virtual City? DeliveryCity { get; set; }
 
     public virtual ICollection<ParcelCourier> ParcelCouriers { get; set; } = new List<ParcelCourier>();
