@@ -1,0 +1,53 @@
+﻿@model IEnumerable<PostDomain.Model.ParcelDimension>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.LengthCm)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WidthCm)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HeightCm)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Parcel)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.LengthCm)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.WidthCm)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HeightCm)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Parcel.Id)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ParcelId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.ParcelId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.ParcelId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
