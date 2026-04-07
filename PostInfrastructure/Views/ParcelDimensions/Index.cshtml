@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<PostDomain.Model.ParcelDimension>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Розміри посилок";
 }
 
-<h1>Index</h1>
+<h1>Розміри посилок</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Додати новий розмір посилки</a>
 </p>
 <table class="table">
     <thead>
@@ -43,9 +43,9 @@
                 @Html.DisplayFor(modelItem => item.Parcel.Id)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ParcelId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ParcelId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ParcelId">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.ParcelId">Деталі</a> |
+                <a asp-action="Details" asp-route-id="@item.ParcelId">Деталі</a> |
+                <a asp-action="Delete" asp-route-id="@item.ParcelId">Видалити</a>
             </td>
         </tr>
 }

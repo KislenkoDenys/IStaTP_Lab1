@@ -1,20 +1,17 @@
-﻿@model IEnumerable<PostDomain.Model.Customer>
+﻿@model IEnumerable<PostDomain.Model.Courier>
 
 @{
-    ViewData["Title"] = "Клієнти";
+    ViewData["Title"] = "Кур'єри";
 }
 
-<h1>Клієнти</h1>
+<h1>Кур'єри</h1>
 
 <p>
-    <a asp-action="Create">Додати нового клієнта</a>
+    <a asp-action="Create">Додати нового кур'єра</a>
 </p>
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Adress)
-            </th>
             <th>
                 @Html.DisplayNameFor(model => model.FirstName)
             </th>
@@ -25,13 +22,13 @@
                 @Html.DisplayNameFor(model => model.PhoneNumber)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Email)
+                @Html.DisplayNameFor(model => model.IsAvailable)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PasswordHash)
+                @Html.DisplayNameFor(model => model.Branch)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.City)
+                @Html.DisplayNameFor(model => model.VehicleType)
             </th>
             <th></th>
         </tr>
@@ -39,9 +36,6 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Adress)
-            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.FirstName)
             </td>
@@ -52,13 +46,13 @@
                 @Html.DisplayFor(modelItem => item.PhoneNumber)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
+                @Html.DisplayFor(modelItem => item.IsAvailable)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PasswordHash)
+                @Html.DisplayFor(modelItem => item.Branch.Phone)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.City.Country)
+                @Html.DisplayFor(modelItem => item.VehicleType.Name)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Змінити</a> |

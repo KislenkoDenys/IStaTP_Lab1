@@ -105,7 +105,7 @@ namespace PostInfrastructure.Controllers
             {
                 return NotFound();
             }
-
+            ModelState.Remove("City");
             if (ModelState.IsValid)
             {
                 try

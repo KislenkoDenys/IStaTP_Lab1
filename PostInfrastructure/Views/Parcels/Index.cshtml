@@ -1,0 +1,83 @@
+﻿@model IEnumerable<PostDomain.Model.Parcel>
+
+@{
+    ViewData["Title"] = "Посилки";
+}
+
+<h1>Посилки</h1>
+
+<p>
+    <a asp-action="Create">Додати нову посилку</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DeliveryAddress)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Weight)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DeliveryCity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Receiver)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ReceiverBranch)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sender)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SenderBranch)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tariff)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.DeliveryAddress)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Weight)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DeliveryCity.Country)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Receiver.Adress)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReceiverBranch.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sender.Adress)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SenderBranch.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tariff.Name)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Змінити</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Деталі</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Видалити</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

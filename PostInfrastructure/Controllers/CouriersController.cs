@@ -10,23 +10,23 @@ using PostInfrastructure;
 
 namespace PostInfrastructure.Controllers
 {
-    public class CustomersController : Controller
+    public class CouriersController : Controller
     {
         private readonly PostDbContext _context;
 
-        public CustomersController(PostDbContext context)
+        public CouriersController(PostDbContext context)
         {
             _context = context;
         }
 
-        // GET: Customers
+        // GET: Couriers
         public async Task<IActionResult> Index()
         {
-            var postDbContext = _context.Customers.Include(c => c.City);
+            var postDbContext = _context.Couriers.Include(c => c.Branch).Include(c => c.VehicleType);
             return View(await postDbContext.ToListAsync());
         }
 
-        // GET: Customers/Details/5
+        // GET: Couriers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,43 +34,45 @@ namespace PostInfrastructure.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .Include(c => c.City)
+            var courier = await _context.Couriers
+                .Include(c => c.Branch)
+                .Include(c => c.VehicleType)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            if (courier == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(courier);
         }
 
-        // GET: Customers/Create
+        // GET: Couriers/Create
         public IActionResult Create()
         {
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Name");
+            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Phone");
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
             return View();
         }
 
-        // POST: Customers/Create
+        // POST: Couriers/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CityId,Adress,FirstName,Surname,PhoneNumber,Email,PasswordHash,Id")] Customer customer)
+        public async Task<IActionResult> Create([Bind("FirstName,Surname,VehicleTypeId,PhoneNumber,IsAvailable,BranchId,Id")] Courier courier)
         {
-            ModelState.Remove("PasswordHash");
             if (ModelState.IsValid)
             {
-                _context.Add(customer);
+                _context.Add(courier);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Country", customer.CityId);
-            return View(customer);
+            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Phone", courier.BranchId);
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", courier.VehicleTypeId);
+            return View(courier);
         }
 
-        // GET: Customers/Edit/5
+        // GET: Couriers/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -78,23 +80,24 @@ namespace PostInfrastructure.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            var courier = await _context.Couriers.FindAsync(id);
+            if (courier == null)
             {
                 return NotFound();
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Name", customer.CityId);
-            return View(customer);
+            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Phone", courier.BranchId);
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", courier.VehicleTypeId);
+            return View(courier);
         }
 
-        // POST: Customers/Edit/5
+        // POST: Couriers/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CityId,Adress,FirstName,Surname,PhoneNumber,Email,PasswordHash,Id")] Customer customer)
+        public async Task<IActionResult> Edit(int id, [Bind("FirstName,Surname,VehicleTypeId,PhoneNumber,IsAvailable,BranchId,Id")] Courier courier)
         {
-            if (id != customer.Id)
+            if (id != courier.Id)
             {
                 return NotFound();
             }
@@ -103,12 +106,12 @@ namespace PostInfrastructure.Controllers
             {
                 try
                 {
-                    _context.Update(customer);
+                    _context.Update(courier);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CustomerExists(customer.Id))
+                    if (!CourierExists(courier.Id))
                     {
                         return NotFound();
                     }
@@ -119,11 +122,12 @@ namespace PostInfrastructure.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Country", customer.CityId);
-            return View(customer);
+            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Phone", courier.BranchId);
+            ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", courier.VehicleTypeId);
+            return View(courier);
         }
 
-        // GET: Customers/Delete/5
+        // GET: Couriers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -131,35 +135,36 @@ namespace PostInfrastructure.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .Include(c => c.City)
+            var courier = await _context.Couriers
+                .Include(c => c.Branch)
+                .Include(c => c.VehicleType)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            if (courier == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(courier);
         }
 
-        // POST: Customers/Delete/5
+        // POST: Couriers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer != null)
+            var courier = await _context.Couriers.FindAsync(id);
+            if (courier != null)
             {
-                _context.Customers.Remove(customer);
+                _context.Couriers.Remove(courier);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CustomerExists(int id)
+        private bool CourierExists(int id)
         {
-            return _context.Customers.Any(e => e.Id == id);
+            return _context.Couriers.Any(e => e.Id == id);
         }
     }
 }
