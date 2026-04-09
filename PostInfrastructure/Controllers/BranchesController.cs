@@ -10,23 +10,23 @@ using PostInfrastructure;
 
 namespace PostInfrastructure.Controllers
 {
-    public class CustomersController : Controller
+    public class BranchesController : Controller
     {
         private readonly PostDbContext _context;
 
-        public CustomersController(PostDbContext context)
+        public BranchesController(PostDbContext context)
         {
             _context = context;
         }
 
-        // GET: Customers
-        public async Task<IActionResult> Index()
+        // GET: Branches
+        public async Task<IActionResult> Index(int? id)
         {
-            var postDbContext = _context.Customers.Include(c => c.City);
-            return View(await postDbContext.ToListAsync());
+            var branches = _context.Branches.Include(b => b.Location).ThenInclude(l => l.City);
+            return View(await branches.ToListAsync());
         }
 
-        // GET: Customers/Details/5
+        // GET: Branches/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,48 +34,45 @@ namespace PostInfrastructure.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .Include(c => c.City)
+            var branch = await _context.Branches
+                .Include(b => b.Location)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            if (branch == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(branch);
         }
 
-        // GET: Customers/Create
+        // GET: Branches/Create
         public IActionResult Create()
         {
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Name");
+            var locations = _context.BranchLocations.Include(l => l.City).Select(l => new {l.Id,FullAddress = l.City.Name + ", " + l.Street + " " + l.Building});
+
+            ViewData["LocationId"] = new SelectList(locations, "Id", "FullAddress");
             return View();
         }
 
-        // POST: Customers/Create
+        // POST: Branches/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CityId,Adress,FirstName,Surname,PhoneNumber,Email,PasswordHash,Id")] Customer customer)
+        public async Task<IActionResult> Create([Bind("LocationId,Phone,WorkingHours,Id")] Branch branch)
         {
-            City city = _context.Cities.FirstOrDefault(c => c.Id == customer.CityId);
-            customer.City = city;
-            ModelState.Clear();
-            TryValidateModel(customer);
-            ModelState.Remove("PasswordHash");
-            customer.PasswordHash = "123";
+            ModelState.Remove("Location");
             if (ModelState.IsValid)
             {
-                _context.Add(customer);
+                _context.Add(branch);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Country", customer.CityId);
-            return View(customer);
+            ViewData["LocationId"] = new SelectList(_context.BranchLocations, "Id", "Street", branch.LocationId);
+            return View(branch);
         }
 
-        // GET: Customers/Edit/5
+        // GET: Branches/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -83,23 +80,24 @@ namespace PostInfrastructure.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            var branch = await _context.Branches.FindAsync(id);
+            if (branch == null)
             {
                 return NotFound();
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Name", customer.CityId);
-            return View(customer);
+            var locations = _context.BranchLocations.Include(l => l.City).Select(l => new {l.Id,FullAddress = l.City.Name + ", " + l.Street + " " + l.Building});
+            ViewData["LocationId"] = new SelectList(locations, "Id", "FullAddress");
+            return View(branch);
         }
 
-        // POST: Customers/Edit/5
+        // POST: Branches/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CityId,Adress,FirstName,Surname,PhoneNumber,Email,PasswordHash,Id")] Customer customer)
+        public async Task<IActionResult> Edit(int id, [Bind("LocationId,Phone,WorkingHours,Id")] Branch branch)
         {
-            if (id != customer.Id)
+            if (id != branch.Id)
             {
                 return NotFound();
             }
@@ -108,12 +106,12 @@ namespace PostInfrastructure.Controllers
             {
                 try
                 {
-                    _context.Update(customer);
+                    _context.Update(branch);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CustomerExists(customer.Id))
+                    if (!BranchExists(branch.Id))
                     {
                         return NotFound();
                     }
@@ -124,11 +122,11 @@ namespace PostInfrastructure.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Country", customer.CityId);
-            return View(customer);
+            ViewData["LocationId"] = new SelectList(_context.BranchLocations, "Id", "Building", branch.LocationId);
+            return View(branch);
         }
 
-        // GET: Customers/Delete/5
+        // GET: Branches/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -136,35 +134,35 @@ namespace PostInfrastructure.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .Include(c => c.City)
+            var branch = await _context.Branches
+                .Include(b => b.Location)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            if (branch == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(branch);
         }
 
-        // POST: Customers/Delete/5
+        // POST: Branches/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer != null)
+            var branch = await _context.Branches.FindAsync(id);
+            if (branch != null)
             {
-                _context.Customers.Remove(customer);
+                _context.Branches.Remove(branch);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CustomerExists(int id)
+        private bool BranchExists(int id)
         {
-            return _context.Customers.Any(e => e.Id == id);
+            return _context.Branches.Any(e => e.Id == id);
         }
     }
 }

@@ -49,26 +49,31 @@ namespace PostInfrastructure.Controllers
         // GET: Couriers/Create
         public IActionResult Create()
         {
-            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Phone");
+            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Id");
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name");
-            return View();
+            return View(new Courier { IsAvailable = true });
         }
 
-        // POST: Couriers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("FirstName,Surname,VehicleTypeId,PhoneNumber,IsAvailable,BranchId,Id")] Courier courier)
         {
+            Branch branch = _context.Branches.Include(b => b.Location).ThenInclude(l => l.City).FirstOrDefault(b => b.Id == courier.BranchId);
+            VehicleType vehicleType = _context.VehicleTypes.FirstOrDefault(v => v.Id == courier.VehicleTypeId);
+            courier.Branch = branch;
+            courier.VehicleType = vehicleType;
+            courier.ParcelCouriers = new List<ParcelCourier>();
+            ModelState.Clear();
+            TryValidateModel(courier);
             if (ModelState.IsValid)
             {
                 _context.Add(courier);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Phone", courier.BranchId);
+            ViewData["BranchId"] = new SelectList(_context.Branches, "Id", "Id", courier.BranchId);
             ViewData["VehicleTypeId"] = new SelectList(_context.VehicleTypes, "Id", "Name", courier.VehicleTypeId);
+
             return View(courier);
         }
 
@@ -101,7 +106,9 @@ namespace PostInfrastructure.Controllers
             {
                 return NotFound();
             }
-
+            ModelState.Remove("Branch");
+            ModelState.Remove("VehicleType");
+            ModelState.Remove("ParcelCouriers");
             if (ModelState.IsValid)
             {
                 try

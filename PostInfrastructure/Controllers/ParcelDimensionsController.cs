@@ -55,18 +55,51 @@ namespace PostInfrastructure.Controllers
         // POST: ParcelDimensions/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("ParcelId,LengthCm,WidthCm,HeightCm")] ParcelDimension parcelDimension)
+        //{
+        //    var parcel = _context.Parcels.FirstOrDefault(p => p.Id == parcelDimension.ParcelId);
+        //    parcelDimension.Parcel = parcel;
+        //    ModelState.Clear();
+        //    if (parcel == null)
+        //    {
+        //        ModelState.AddModelError("ParcelId", "Такої посилки не існує");
+        //    }
+        //    TryValidateModel(parcelDimension);
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(parcelDimension);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["ParcelId"] = new SelectList(_context.Parcels, "Id", "Id", parcelDimension.ParcelId);
+        //    return View(parcelDimension);
+        //}
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ParcelId,LengthCm,WidthCm,HeightCm")] ParcelDimension parcelDimension)
         {
-            if (ModelState.IsValid)
+            if (parcelDimension.LengthCm == 0) decimal.TryParse(Request.Form["LengthCm"].ToString().Replace(".", ","), out var l);
+            ModelState.Clear();
+            var parcel = _context.Parcels.FirstOrDefault(p => p.Id == parcelDimension.ParcelId);
+            if (parcel != null)
+            {
+                parcelDimension.Parcel = parcel;
+            }
+            try
             {
                 _context.Add(parcelDimension);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ParcelId"] = new SelectList(_context.Parcels, "Id", "Id", parcelDimension.ParcelId);
-            return View(parcelDimension);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Помилка бази: " + (ex.InnerException?.Message ?? ex.Message));
+                ViewData["ParcelId"] = new SelectList(_context.Parcels, "Id", "Id", parcelDimension.ParcelId);
+                return View(parcelDimension);
+            }
         }
 
         // GET: ParcelDimensions/Edit/5
@@ -91,35 +124,41 @@ namespace PostInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ParcelId,LengthCm,WidthCm,HeightCm")] ParcelDimension parcelDimension)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ParcelId,LengthCm,WidthCm,HeightCm")] ParcelDimension parcelDimension)
         {
             if (id != parcelDimension.ParcelId)
             {
                 return NotFound();
             }
-
-            if (ModelState.IsValid)
+            ModelState.Clear();
+            var parcel = _context.Parcels.FirstOrDefault(p => p.Id == parcelDimension.ParcelId);
+            if (parcel != null)
             {
-                try
-                {
-                    _context.Update(parcelDimension);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ParcelDimensionExists(parcelDimension.ParcelId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                parcelDimension.Parcel = parcel;
+            }
+            try
+            {
+                _context.Update(parcelDimension);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ParcelId"] = new SelectList(_context.Parcels, "Id", "Id", parcelDimension.ParcelId);
-            return View(parcelDimension);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.ParcelDimensions.Any(e => e.ParcelId == parcelDimension.ParcelId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Помилка бази: " + (ex.InnerException?.Message ?? ex.Message));
+                ViewData["ParcelId"] = new SelectList(_context.Parcels, "Id", "Id", parcelDimension.ParcelId);
+                return View(parcelDimension);
+            }
         }
 
         // GET: ParcelDimensions/Delete/5

@@ -1,0 +1,53 @@
+﻿@model IEnumerable<PostDomain.Model.Branch>
+
+@{
+    ViewData["Title"] = "Відділення";
+}
+
+<h1>Відділення</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WorkingHours)
+            </th>
+            <th>Місто</th>
+            <th>Вулиця</th>
+            <th>Будинок</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.WorkingHours)
+            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Location.City.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Location.Street)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Location.Building)
+                </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Змінити</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Деталі</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Видалити</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -11,8 +11,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<PostDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        o => o.MapEnum<CourierStatus>("delivery_statuses", nameTranslator: new NpgsqlNullNameTranslator())
-              .MapEnum<ParcelStatus>("parcel_statuses", nameTranslator: new NpgsqlNullNameTranslator())
+        o => o.MapEnum<CourierStatus>("delivery_statuses"/*, nameTranslator: new NpgsqlNullNameTranslator()*/)
+              .MapEnum<ParcelStatus>("parcel_statuses"/*, nameTranslator: new NpgsqlNullNameTranslator()*/)
     )
 );
 

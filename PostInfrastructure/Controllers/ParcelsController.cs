@@ -69,6 +69,21 @@ namespace PostInfrastructure.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("SenderId,ReceiverId,SenderBranchId,ReceiverBranchId,DeliveryCityId,DeliveryAddress,TariffId,Weight,Status,Id")] Parcel parcel)
         {
+            parcel.Status = ParcelStatus.Created;
+            var sender = _context.Customers.FirstOrDefault(c => c.Id == parcel.SenderId);
+            var receiver = _context.Customers.FirstOrDefault(c => c.Id == parcel.ReceiverId);
+            var senderBranch = _context.Branches.Include(b => b.Location).ThenInclude(l => l.City).FirstOrDefault(b => b.Id == parcel.SenderBranchId);
+            var receiverBranch = _context.Branches.Include(b => b.Location).ThenInclude(l => l.City).FirstOrDefault(b => b.Id == parcel.ReceiverBranchId);
+            var deliveryCity = _context.Cities.FirstOrDefault(c => c.Id == parcel.DeliveryCityId);
+            var tariff = _context.Tariffs.FirstOrDefault(t => t.Id == parcel.TariffId);
+            parcel.Sender = sender;
+            parcel.Receiver = receiver;
+            parcel.SenderBranch = senderBranch;
+            parcel.ReceiverBranch = receiverBranch;
+            parcel.DeliveryCity = deliveryCity;
+            parcel.Tariff = tariff;
+            ModelState.Clear();
+            TryValidateModel(parcel);
             if (ModelState.IsValid)
             {
                 _context.Add(parcel);
@@ -117,7 +132,20 @@ namespace PostInfrastructure.Controllers
             {
                 return NotFound();
             }
-
+            var sender = _context.Customers.FirstOrDefault(c => c.Id == parcel.SenderId);
+            var receiver = _context.Customers.FirstOrDefault(c => c.Id == parcel.ReceiverId);
+            var senderBranch = _context.Branches.Include(b => b.Location).ThenInclude(l => l.City).FirstOrDefault(b => b.Id == parcel.SenderBranchId);
+            var receiverBranch = _context.Branches.Include(b => b.Location).ThenInclude(l => l.City).FirstOrDefault(b => b.Id == parcel.ReceiverBranchId);
+            var deliveryCity = _context.Cities.FirstOrDefault(c => c.Id == parcel.DeliveryCityId);
+            var tariff = _context.Tariffs.FirstOrDefault(t => t.Id == parcel.TariffId);
+            parcel.Sender = sender;
+            parcel.Receiver = receiver;
+            parcel.SenderBranch = senderBranch;
+            parcel.ReceiverBranch = receiverBranch;
+            parcel.DeliveryCity = deliveryCity;
+            parcel.Tariff = tariff;
+            ModelState.Clear();
+            TryValidateModel(parcel);
             if (ModelState.IsValid)
             {
                 try

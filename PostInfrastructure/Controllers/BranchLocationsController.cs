@@ -20,6 +20,7 @@ namespace PostInfrastructure.Controllers
         }
 
         // GET: BranchLocations
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public async Task<IActionResult> Index(int ?id, string? name)
         {
             if (id == 0) return RedirectToAction("Cities", "Index");
@@ -45,13 +46,13 @@ namespace PostInfrastructure.Controllers
                 return NotFound();
             }
 
-            return View(branchLocation);
+            return RedirectToAction("Index", "Branches", new { id = branchLocation.Id, name = branchLocation.City.Name });
         }
 
         // GET: BranchLocations/Create
         public IActionResult Create()
         {
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Country");
+            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Name");
             return View();
         }
 
@@ -60,7 +61,7 @@ namespace PostInfrastructure.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CityId,Street,Building,PostalCode,Id")] BranchLocation branchLocation)
+        public async Task<IActionResult> Create([Bind("CityId,Street,Building,PostalCode")] BranchLocation branchLocation)
         {
             City city = _context.Cities.FirstOrDefault(c => c.Id == branchLocation.CityId);
             branchLocation.City = city;
@@ -71,9 +72,9 @@ namespace PostInfrastructure.Controllers
             {
                 _context.Add(branchLocation);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { id = branchLocation.CityId });
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Country", branchLocation.CityId);
+            ViewData["CityId"] = new SelectList(_context.Cities, "Id", "Name", branchLocation.CityId);
             return View(branchLocation);
         }
 
@@ -157,10 +158,11 @@ namespace PostInfrastructure.Controllers
             var branchLocation = await _context.BranchLocations.FindAsync(id);
             if (branchLocation != null)
             {
+                int cityIdToReturn = branchLocation.CityId;
                 _context.BranchLocations.Remove(branchLocation);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index), new { id = cityIdToReturn });
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction("Index", new { branchLocation.CityId });
         }
 

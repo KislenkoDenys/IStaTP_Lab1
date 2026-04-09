@@ -38,9 +38,11 @@ public partial class PostDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder
-            .HasPostgresEnum("delivery_statuses", new[] { "assigned", "picked_up", "delivered", "failed" })
-            .HasPostgresEnum("parcel_statuses", new[] { "created", "processing", "in_transit", "delivered", "cancelled" });
+        modelBuilder.HasPostgresEnum<ParcelStatus>("parcel_statuses");
+        modelBuilder.HasPostgresEnum<CourierStatus>("delivery_statuses");
+        //modelBuilder
+        //    .HasPostgresEnum("delivery_statuses", new[] { "assigned", "picked_up", "delivered", "failed" })
+        //    .HasPostgresEnum("parcel_statuses", new[] { "created", "processing", "in_transit", "delivered", "cancelled" });
 
         modelBuilder.Entity<Branch>(entity =>
         {
@@ -261,7 +263,9 @@ public partial class PostDbContext : DbContext
         });
 
         OnModelCreatingPartial(modelBuilder);
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
 }
