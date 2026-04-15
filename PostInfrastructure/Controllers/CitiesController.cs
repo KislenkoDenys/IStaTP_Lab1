@@ -7,16 +7,18 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PostDomain.Model;
 using PostInfrastructure;
+using PostInfrastructure.Services;
 
 namespace PostInfrastructure.Controllers
 {
     public class CitiesController : Controller
     {
         private readonly PostDbContext _context;
-
-        public CitiesController(PostDbContext context)
+        private readonly IDataPortServiceFactory<City> _cityDataPortServiceFactory;
+        public CitiesController(PostDbContext context, IDataPortServiceFactory<City> cityDataPortServiceFactory)
         {
             _context = context;
+            _cityDataPortServiceFactory = cityDataPortServiceFactory;
         }
 
         // GET: Cities
@@ -140,19 +142,62 @@ namespace PostInfrastructure.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var city = await _context.Cities.FindAsync(id);
+            var city = await _context.Cities
+                .Include(c => c.BranchLocations)
+                    .ThenInclude(l => l.Branches)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (city != null)
             {
+                foreach (var location in city.BranchLocations)
+                {
+                    _context.Branches.RemoveRange(location.Branches);
+                }
+                _context.BranchLocations.RemoveRange(city.BranchLocations);
                 _context.Cities.Remove(city);
+
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CityExists(int id)
         {
             return _context.Cities.Any(e => e.Id == id);
+        }
+        [HttpGet]
+        public IActionResult Import()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Import(IFormFile fileExcel, CancellationToken cancellationToken = default)
+        {
+            var importService = _cityDataPortServiceFactory.GetImportService(fileExcel.ContentType);
+            using var stream = fileExcel.OpenReadStream();
+            await importService.ImportFromStreamAsync(stream, cancellationToken);
+
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpGet]
+        public async Task<IActionResult> Export([FromQuery] string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", CancellationToken cancellationToken = default)
+        {
+            var exportService = _cityDataPortServiceFactory.GetExportService(contentType);
+            var memoryStream = new MemoryStream();
+
+            await exportService.WriteToAsync(memoryStream, cancellationToken);
+
+            await memoryStream.FlushAsync(cancellationToken);
+            memoryStream.Position = 0;
+
+            // Файл буде називатися PostBranches_Дата.xlsx
+            return new FileStreamResult(memoryStream, contentType)
+            {
+                FileDownloadName = $"PostBranches_{DateTime.UtcNow.ToShortDateString()}.xlsx"
+            };
         }
     }
 }

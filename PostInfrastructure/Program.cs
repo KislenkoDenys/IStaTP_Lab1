@@ -1,13 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using PostInfrastructure;
 using Npgsql.NameTranslation;
 using PostDomain.Model;
+using PostInfrastructure;
+using PostInfrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<IDataPortServiceFactory<City>, CityDataPortServiceFactory>();
 builder.Services.AddDbContext<PostDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -39,4 +41,4 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 
-app.Run();
+app.Run();  

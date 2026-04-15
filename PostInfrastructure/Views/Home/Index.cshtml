@@ -1,8 +1,77 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Статистика";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-4">
+    <h1 class="display-4 text-light">Статистика поштового сервісу</h1>
 </div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div id="branchesCityChart" style="width: 100%; height: 400px;"></div>
+    </div>
+    <div class="col-md-6">
+        <div id="parcelsTariffChart" style="width: 100%; height: 400px;"></div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+        fetch('/api/chart/branchesByCity')
+        .then(response => response.json())
+        .then(data => {
+        const dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Місто');
+        dataTable.addColumn('number', 'Кількість відділень');
+
+        data.forEach(item => {
+        dataTable.addRow([item.city || item.City, item.count || item.Count]);
+        });
+
+        const options = {
+        title: 'Частка відділень по містах',
+        pieHole: 0.4,
+        backgroundColor: 'transparent',
+        textStyle: { color: '#FFF' },
+        legendTextStyle: { color: '#FFF' },
+        titleTextStyle: { color: '#FFF' }
+        };
+
+        const chart = new google.visualization.PieChart(document.getElementById('branchesCityChart'));
+        chart.draw(dataTable, options);
+        })
+        .catch(error => console.error('Помилка завантаження першого графіка:', error));
+        fetch('/api/chart/parcelsByTariff')
+        .then(response => response.json())
+        .then(data => {
+        const dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Тариф');
+        dataTable.addColumn('number', 'Кількість посилок');
+
+        data.forEach(item => {
+        dataTable.addRow([item.tariff || item.Tariff, item.count || item.Count]);
+        });
+
+        const options = {
+        title: 'Популярність тарифів',
+        backgroundColor: 'transparent',
+        legend: { position: 'none' },
+        textStyle: { color: '#FFF' },
+        hAxis: { textStyle: { color: '#FFF' } },
+        vAxis: { textStyle: { color: '#FFF' } },
+        titleTextStyle: { color: '#FFF' }
+        };
+
+        const chart = new google.visualization.ColumnChart(document.getElementById('parcelsTariffChart'));
+        chart.draw(dataTable, options);
+        })
+        .catch(error => console.error('Помилка завантаження другого графіка:', error));
+        }
+    </script>
+}
